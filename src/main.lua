@@ -108,6 +108,7 @@ function on_wakeup(time)
                 sendBeacon(newValue, isChanged, sensor, function()
                     rtcmem.write32(RTC_POS_VALUE, newValue)
                     rtcmem.write32(RTC_POS_NEXT_CHECKIN, time + CHECKIN_TIME)
+                    rtcmem.write32(RTC_POS_ERR_COUNT, 0)
 
                     wlan_disable(function()
                         print("WLAN off, sleeping...")
@@ -144,7 +145,8 @@ function sendBeacon(status, isChanged, hc1, callback)
         mqtt_publish(client, topic.."/sd", hc1.sd, 0, 1)
         mqtt_publish(client, topic.."/cv", hc1.cv, 0, 1)
         mqtt_publish(client, topic.."/vcc", adc.readvdd33(), 0, 1)
-        
+        mqtt_publish(client, topic.."/rssi", wifi.sta.getrssi(), 0, 1)
+
         local errCount = rtcmem.read32(RTC_POS_ERR_COUNT)
         if errCount > 0 then
             mqtt_publish(client, topic.."/lastErrors", errCount, 0, 1)

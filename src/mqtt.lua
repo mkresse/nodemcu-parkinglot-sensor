@@ -35,8 +35,8 @@ MQTT_PUB_FINAL_CALLBACK=nil
 
 function mqtt_pub_callback()
     MQTT_PUB_COUNT = MQTT_PUB_COUNT - 1
-    print("  mqtt publish done")
     if MQTT_PUB_COUNT == 0 and MQTT_PUB_FINAL_CALLBACK then
+        print("all mqtt publish done")
         MQTT_PUB_FINAL_CALLBACK()
     end
 end
@@ -44,6 +44,7 @@ end
 function mqtt_publish(client, topic, payload, qos, retain, cb)
     MQTT_PUB_COUNT=MQTT_PUB_COUNT + 1
     MQTT_PUB_FINAL_CALLBACK=cb
+    print(string.format("  mqtt publish %s = %s", topic, payload))
     client:publish(topic, payload, qos, retain, mqtt_pub_callback)
 end
 

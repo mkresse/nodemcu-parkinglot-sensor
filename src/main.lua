@@ -38,6 +38,8 @@ function on_powerup(time)
     rtcmem.write32(RTC_POS_INITIALIZED, 0)
     rtcmem.write32(RTC_POS_VALUE, PL_UNDEFINED)
     rtcmem.write32(RTC_POS_NEXT_CHECKIN, time + CHECKIN_TIME)
+    rtcmem.write32(RTC_POS_SUCC_SAMPLE_COUNT, 0)
+    rtcmem.write32(RTC_POS_SUCC_CHECKIN_COUNT, 0)
 
     wlan_enable(function()
         print("WLAN on")
@@ -72,7 +74,7 @@ function powerupBeacon(callback)
 end
 
 function getStatus(sensor)
-    if sensor.distance > 1 then
+    if sensor.distance > TAKEN_THRESHOLD then
         return PL_FREE
     elseif sensor.distance > 0 then
         return PL_TAKEN
@@ -88,6 +90,8 @@ function on_wakeup(time)
 
     local sensor = hcsr04.init()
     sensor.measure(function()
+        rtcmem.write32(RTC_POS_SUCC_SAMPLE_COUNT, rtcmem.read32(RTC_POS_SUCC_SAMPLE_COUNT) + 1)
+
         local newValue = getStatus(sensor)
         local isChanged = (lastValue ~= newValue)
         if isChanged then
@@ -109,6 +113,7 @@ function on_wakeup(time)
                     rtcmem.write32(RTC_POS_VALUE, newValue)
                     rtcmem.write32(RTC_POS_NEXT_CHECKIN, time + CHECKIN_TIME)
                     rtcmem.write32(RTC_POS_ERR_COUNT, 0)
+                    rtcmem.write32(RTC_POS_SUCC_CHECKIN_COUNT, rtcmem.read32(RTC_POS_SUCC_CHECKIN_COUNT) + 1)
 
                     wlan_disable(function()
                         print("WLAN off, sleeping...")
@@ -146,6 +151,8 @@ function sendBeacon(status, isChanged, hc1, callback)
         mqtt_publish(client, topic.."/cv", hc1.cv, 0, 1)
         mqtt_publish(client, topic.."/vcc", adc.readvdd33(), 0, 1)
         mqtt_publish(client, topic.."/rssi", wifi.sta.getrssi(), 0, 1)
+        mqtt_publish(client, topic.."/sampleCount", rtcmem.read32(RTC_POS_SUCC_SAMPLE_COUNT), 0, 1)
+        mqtt_publish(client, topic.."/checkinCount", rtcmem.read32(RTC_POS_SUCC_CHECKIN_COUNT), 0, 1)
 
         local errCount = rtcmem.read32(RTC_POS_ERR_COUNT)
         if errCount > 0 then

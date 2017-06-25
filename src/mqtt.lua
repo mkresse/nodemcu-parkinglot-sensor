@@ -47,33 +47,3 @@ function mqtt_publish(client, topic, payload, qos, retain, cb)
     print(string.format("  mqtt publish %s = %s", topic, payload))
     client:publish(topic, payload, qos, retain, mqtt_pub_callback)
 end
-
-function testmqtt()
-
-    dofile("config.lua")
-    dofile("wlan.lua")
-    dofile("sr04.lua")
-    
-    local m = mqtt_create_client()
-    
-    wlan_enable(function()
-        mqtt_send(m, function(client)
-
-          -- subscribe topic with qos = 0
-          client:subscribe("#", 0, function(client) print("subscribe success") end)
-
-          -- publish a message with data = hello, QoS = 0, retain = 0
-          client:publish("/topic", "Hello World!", 0, 0, function(client) print("sent") end)
-        
-          local hc1 = hcsr04.init()
-          hc1.measure(function()
-            client:publish("parking/"..MQTT_TOPICID.."/distance", hc1.distance, 0, 1)
-            client:publish("parking/"..MQTT_TOPICID.."/sd", hc1.sd, 0, 1)
-            client:publish("parking/"..MQTT_TOPICID.."/cv", hc1.cv, 0, 1)
-            client:publish("parking/"..MQTT_TOPICID.."/vcc", adc.readvdd33(), 0, 1)
-          end)
-
-        end)
-    end)
-
-end

@@ -2,6 +2,7 @@ local rawcode, reason = node.bootreason()
 print ("bootreason: ", rawcode, reason)
 print ("rtctime:    ", rtctime.get())
 print ("value:      ", rtcmem.read32(127))
+print ("vin:        ", 3.3*2/1024*adc.read(0))
 
 local STARTUP_DELAY = 3000
 

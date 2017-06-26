@@ -6,8 +6,8 @@ dofile("mqtt.lua")
 
 function main()
     -- enable vcc measurement
-    if adc.force_init_mode(adc.INIT_VDD33) then
-        print("Switching ADC to VDD33 mode")
+    if adc.force_init_mode(adc.INIT_ADC) then
+        print("Switching ADC to EXT mode")
         node.restart()
         return -- don't bother continuing, the restart is scheduled
     end
@@ -149,7 +149,7 @@ function sendBeacon(status, isChanged, hc1, callback)
         mqtt_publish(client, topic.."/distance", hc1.distance, 0, 1)
         mqtt_publish(client, topic.."/sd", hc1.sd, 0, 1)
         mqtt_publish(client, topic.."/cv", hc1.cv, 0, 1)
-        mqtt_publish(client, topic.."/vcc", adc.readvdd33(), 0, 1)
+        mqtt_publish(client, topic.."/vin", adc.read(0)*ADC_FACTOR, 0, 1)
         mqtt_publish(client, topic.."/rssi", wifi.sta.getrssi(), 0, 1)
         mqtt_publish(client, topic.."/sampleCount", rtcmem.read32(RTC_POS_SUCC_SAMPLE_COUNT), 0, 1)
         mqtt_publish(client, topic.."/checkinCount", rtcmem.read32(RTC_POS_SUCC_CHECKIN_COUNT), 0, 1)

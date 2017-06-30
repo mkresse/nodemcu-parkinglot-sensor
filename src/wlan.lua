@@ -1,5 +1,5 @@
 
-function wlan_enable(success, failure)
+function wlan_enable(success)
     local started = tmr.now()
 
     wifi.eventmon.register(wifi.eventmon.STA_CONNECTED, function(t)
@@ -15,11 +15,13 @@ function wlan_enable(success, failure)
     end)
 
     print("Connecting to AP...")
-    wifi.setmode(wifi.STATION)
+    wifi.setmode(wifi.STATION, false)
     wifi.sta.config({ssid=WLAN_SSID, pwd=WLAN_PASS})
 end
 
 function wlan_disable(callback)
     wifi.sta.disconnect()
-    wifi.suspend({duration=0, suspend_cb=callback})
+    wifi.setmode(wifi.NULLMODE, true)
+    print("WLAN shutdown")
+    node.task.post(callback)
 end

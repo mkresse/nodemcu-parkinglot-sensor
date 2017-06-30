@@ -12,6 +12,9 @@ SLEEP_TIME = 120
 -- Checkin-Interval in s
 CHECKIN_TIME = 3600
 
+-- ADC factor to include RVDs
+ADC_FACTOR = 3.3*2/1024
+
 -- Address: successful wlan sample count
 RTC_POS_SUCC_SAMPLE_COUNT = 122
 

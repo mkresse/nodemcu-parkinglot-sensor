@@ -49,7 +49,7 @@ function on_powerup(time)
             print("successfully initialized")
 
             wlan_disable(function()
-                print("WLAN off")
+                print(string.format("WLAN off, sleeping %ds...", 1))
     
                 -- trigger initial reading
                 rtctime.dsleep(1 * 1000 * 1000, 4)
@@ -116,7 +116,7 @@ function on_wakeup(time)
                     rtcmem.write32(RTC_POS_SUCC_CHECKIN_COUNT, rtcmem.read32(RTC_POS_SUCC_CHECKIN_COUNT) + 1)
 
                     wlan_disable(function()
-                        print("WLAN off, sleeping...")
+                        print(string.format("WLAN off, sleeping %ds...", SLEEP_TIME))
                         print()
 
                         rtctime.dsleep(SLEEP_TIME * 1000 * 1000, 4)
@@ -124,7 +124,7 @@ function on_wakeup(time)
                 end)
             end)
         else
-            print("no change, sleeping...")
+            print(string.format("no change, sleeping %ds...", SLEEP_TIME))
             print()
 
             rtctime.dsleep(SLEEP_TIME * 1000 * 1000, 4)

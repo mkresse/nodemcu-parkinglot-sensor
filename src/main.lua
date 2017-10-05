@@ -1,4 +1,3 @@
-
 dofile("config.lua")
 dofile("sr04.lua")
 dofile("wlan.lua")
@@ -144,12 +143,13 @@ function sendBeacon(status, isChanged, hc1, callback)
         
         local event = "CHECKIN"
         if isChanged then event = "STATUS_CHANGED" end
-        
+        local vin =  adc.read(0)*ADC_FACTOR
+
         mqtt_publish(client, topic.."/status", status, 0, 1)
         mqtt_publish(client, topic.."/distance", hc1.distance, 0, 1)
         mqtt_publish(client, topic.."/sd", hc1.sd, 0, 1)
         mqtt_publish(client, topic.."/cv", hc1.cv, 0, 1)
-        mqtt_publish(client, topic.."/vin", adc.read(0)*ADC_FACTOR, 0, 1)
+        mqtt_publish(client, topic.."/vin", vin, 0, 1)
         mqtt_publish(client, topic.."/rssi", wifi.sta.getrssi(), 0, 1)
         mqtt_publish(client, topic.."/sampleCount", rtcmem.read32(RTC_POS_SUCC_SAMPLE_COUNT), 0, 1)
         mqtt_publish(client, topic.."/checkinCount", rtcmem.read32(RTC_POS_SUCC_CHECKIN_COUNT), 0, 1)
@@ -157,6 +157,10 @@ function sendBeacon(status, isChanged, hc1, callback)
         local errCount = rtcmem.read32(RTC_POS_ERR_COUNT)
         if errCount > 0 then
             mqtt_publish(client, topic.."/lastErrors", errCount, 0, 1)
+        end
+
+        if vin <= LOW_BATTERY_WARNING_LIMIT then
+            mqtt_publish(client, topic.."/event", "LOW_BATTERY", 1, 0)
         end
 
         mqtt_publish(client, topic.."/event", event, 0, 0, function()
@@ -168,7 +172,7 @@ function sendBeacon(status, isChanged, hc1, callback)
 end
 
 function setupFailureTimeout()
-    tmr.create():alarm(10000, tmr.ALARM_SINGLE, function()
+    tmr.create():alarm(GLOBAL_TIMEOUT, tmr.ALARM_SINGLE, function()
         print("Timeout reached!")
 
         local errCount = rtcmem.read32(RTC_POS_ERR_COUNT) + 1

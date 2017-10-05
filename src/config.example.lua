@@ -5,35 +5,48 @@ MQTT_CLIENTID="client1"
 MQTT_TOPICID="s1"
 MQTT_SERVER="192.168.1.127"
 MQTT_PORT=1883
+MQTT_USER="username"
+MQTT_PASSWD="password"
 
--- Dauer des Deepsleep in s
+-- Global timeout for a whole cycle
+GLOBAL_TIMEOUT = 15000
+
+-- Duration of deep sleep in s
 SLEEP_TIME = 120
 
--- Checkin-Interval in s
+-- Checkin interval in s
 CHECKIN_TIME = 3600
 
--- ADC factor to include RVDs
+-- ADC factor to account for RVDs
 ADC_FACTOR = 3.3*2/1024
 
--- Address: successful wlan sample count
+-- Emit warning if voltage drops below this value
+LOW_BATTERY_WARNING_LIMIT = 3.8
+
+
+---- Positions within RTC memory ----
+
+-- successful distance sampling count
 RTC_POS_SUCC_SAMPLE_COUNT = 122
 
--- Address: successful wlan CHECKIN count
+-- successful wlan CHECKIN count
 RTC_POS_SUCC_CHECKIN_COUNT = 123
 
--- Address: error count
+-- error count
 RTC_POS_ERR_COUNT = 124
 
--- Address: successfully initialized?
+-- was successfully initialized?
 RTC_POS_INITIALIZED = 125
 
--- Adresse: wann soll der nächste Checkin durchgeführt werden
+-- time of the next checkin
 RTC_POS_NEXT_CHECKIN = 126
 
---  Adresse für Speicherung des Wertes
+-- state of the parking lot
 RTC_POS_VALUE = 127
 
+-- Distances below this value are recognized as occupancy
 TAKEN_THRESHOLD = 2
+
 
 -- Parking lot is free
 PL_FREE = 0

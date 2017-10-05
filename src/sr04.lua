@@ -114,7 +114,7 @@ function hcsr04.init(pin_trig, pin_echo)
     self.TRIG_INTERVAL = 15
 
     -- maximum distance in meters
-    self.MAXIMUM_DISTANCE = 15
+    self.MAXIMUM_DISTANCE = 10
 
     -- minimum reading interval with 20% of margin
     self.READING_INTERVAL = math.ceil(((self.MAXIMUM_DISTANCE * 2 / 340 * 1000) + self.TRIG_INTERVAL) * 1.2)

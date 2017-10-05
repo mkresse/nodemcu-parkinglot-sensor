@@ -1,5 +1,5 @@
 function mqtt_create_client()
-    local m = mqtt.Client(MQTT_CLIENTID, 10)
+    local m = mqtt.Client(MQTT_CLIENTID, 10, MQTT_USER, MQTT_PASSWD)
 
     -- setup Last Will and Testament (optional)
     m:lwt("parking/"..MQTT_TOPICID.."/lwt", MQTT_CLIENTID.." unexpected disconnection", 0, 0)
@@ -19,7 +19,7 @@ function mqtt_create_client()
 end
 
 function mqtt_send(m, callback)
-    print(string.format("connecting to %s : %d", MQTT_SERVER, MQTT_PORT))
+    print(string.format("connecting to %s @ %s : %d", MQTT_USER, MQTT_SERVER, MQTT_PORT))
     m:connect(MQTT_SERVER, MQTT_PORT, 0, function(client)
       print("mqtt connected")
       

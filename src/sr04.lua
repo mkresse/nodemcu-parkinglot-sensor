@@ -1,7 +1,18 @@
 
 hcsr04 = {};
 
-function hcsr04.init(pin_trig, pin_echo)
+function hcsr04.enable(value, pin_enable)
+    local pin = pin_enable or 7
+    gpio.mode(pin, gpio.OUTPUT)
+
+    if value then
+        gpio.write(pin, gpio.HIGH)
+    else
+        gpio.write(pin, gpio.LOW)
+    end
+end
+
+function hcsr04.init(pin_trig, pin_echo, pin_enable)
     local self = {
         time_start = 0, time_stop = 0, distance = 0, sd = 0, cv = 0, readings = {}
     }
@@ -124,6 +135,8 @@ function hcsr04.init(pin_trig, pin_echo)
 
     -- CONTINUOUS MEASURING
     self.CONTINUOUS = false
+
+    hcsr04.enable(true, pin_enable)
 
     -- configure pins
     gpio.mode(self.TRIG_PIN, gpio.OUTPUT)

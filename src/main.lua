@@ -11,6 +11,9 @@ function main()
         return -- don't bother continuing, the restart is scheduled
     end
 
+    -- disable sensor
+    hcsr04.enable(false)
+
     print("Starting up...")
 
     local sec, usec = rtctime.get()
@@ -89,6 +92,7 @@ function on_wakeup(time)
 
     local sensor = hcsr04.init()
     sensor.measure(function()
+        hcsr04.enable(false)
         rtcmem.write32(RTC_POS_SUCC_SAMPLE_COUNT, rtcmem.read32(RTC_POS_SUCC_SAMPLE_COUNT) + 1)
 
         local newValue = getStatus(sensor)

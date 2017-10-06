@@ -19,7 +19,7 @@ function mqtt_create_client()
 end
 
 function mqtt_send(m, callback)
-    print(string.format("connecting to %s @ %s : %d", MQTT_USER, MQTT_SERVER, MQTT_PORT))
+    print(string.format("connecting to %s @ %s : %d", MQTT_USER or "", MQTT_SERVER, MQTT_PORT))
     m:connect(MQTT_SERVER, MQTT_PORT, 0, function(client)
       print("mqtt connected")
       

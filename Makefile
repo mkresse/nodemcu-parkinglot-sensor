@@ -6,10 +6,10 @@
 NODEMCU-UPLOADER ?= nodemcu-uploader
 
 # Serial port
-export SERIALPORT ?= /dev/cu.usbserial-A9OZ31TX
-SERIALSPEED ?= 115200
+SERIALPORT?=/dev/cu.usbserial-A9OZ31TX
+SPEED?=115200
 
-NODEMCU-COMMAND=$(NODEMCU-UPLOADER) -b $(SERIALSPEED)
+NODEMCU-COMMAND=$(NODEMCU-UPLOADER) -p $(SERIALPORT) -b $(SPEED)
 
 ######################################################################
 

@@ -2,6 +2,7 @@ dofile("config.lua")
 dofile("sr04.lua")
 dofile("wlan.lua")
 dofile("mqtt.lua")
+dofile("temp.lua")
 
 function main()
     -- enable vcc measurement
@@ -52,7 +53,7 @@ function on_powerup(time)
 
             wlan_disable(function()
                 print(string.format("WLAN off, sleeping %ds...", 1))
-    
+
                 -- trigger initial reading
                 rtctime.dsleep(1 * 1000 * 1000, 4)
             end)
@@ -64,7 +65,7 @@ function powerupBeacon(callback)
     print("publishing powerup status...")
 
     local m = mqtt_create_client()
-    
+
     mqtt_send(m, function(client)
         local topic = "parking/"..MQTT_TOPICID
         mqtt_publish(client, topic.."/event", "POWER_UP", 0, 0, function()
@@ -90,7 +91,7 @@ function on_wakeup(time)
 
     local lastValue = rtcmem.read32(RTC_POS_VALUE)
 
-    local sensor = hcsr04.init()
+    local sensor = hcsr04.init(6,1,7)
     sensor.measure(function()
         hcsr04.enable(false)
         rtcmem.write32(RTC_POS_SUCC_SAMPLE_COUNT, rtcmem.read32(RTC_POS_SUCC_SAMPLE_COUNT) + 1)
@@ -109,10 +110,17 @@ function on_wakeup(time)
 
         if isChanged or doCheckin then
 
+            local tempInstance
+            if (MEASURE_TEMPERATURE) then
+                tempInstance = temp.init()
+                -- assume measurement is faster than WLAN setup
+                tempInstance.measure()
+            end
+
             wlan_enable(function()
                 print("WLAN on")
 
-                sendBeacon(newValue, isChanged, sensor, function()
+                sendBeacon(newValue, isChanged, sensor, tempInstance, function()
                     rtcmem.write32(RTC_POS_VALUE, newValue)
                     rtcmem.write32(RTC_POS_NEXT_CHECKIN, time + CHECKIN_TIME)
                     rtcmem.write32(RTC_POS_ERR_COUNT, 0)
@@ -137,14 +145,14 @@ end
 
 
 
-function sendBeacon(status, isChanged, hc1, callback)
+function sendBeacon(status, isChanged, hc1, tempInstance, callback)
     print("publishing status...")
 
     local m = mqtt_create_client()
-    
+
     mqtt_send(m, function(client)
         local topic = "parking/"..MQTT_TOPICID
-        
+
         local event = "CHECKIN"
         if isChanged then event = "STATUS_CHANGED" end
         local vin =  adc.read(0)*ADC_FACTOR
@@ -155,6 +163,11 @@ function sendBeacon(status, isChanged, hc1, callback)
         mqtt_publish(client, topic.."/cv", hc1.cv, 0, 1)
         mqtt_publish(client, topic.."/vin", vin, 0, 1)
         mqtt_publish(client, topic.."/rssi", wifi.sta.getrssi(), 0, 1)
+
+        if tempInstance then
+            mqtt_publish(client, topic.."/temp", tempInstance.temp, 0, 1)
+        end
+
         mqtt_publish(client, topic.."/sampleCount", rtcmem.read32(RTC_POS_SUCC_SAMPLE_COUNT), 0, 1)
         mqtt_publish(client, topic.."/checkinCount", rtcmem.read32(RTC_POS_SUCC_CHECKIN_COUNT), 0, 1)
 

@@ -23,6 +23,8 @@ ADC_FACTOR = 3.3*2/1024
 -- Emit warning if voltage drops below this value
 LOW_BATTERY_WARNING_LIMIT = 3.8
 
+-- Enable temperature measurement
+MEASURE_TEMPERATURE = TRUE
 
 ---- Positions within RTC memory ----
 

@@ -90,6 +90,8 @@ function on_wakeup(time)
     print("DSLEEP wakeup", tmr.now(), tmr.time(), time)
 
     local lastValue = rtcmem.read32(RTC_POS_VALUE)
+    -- read voltage before wlan
+    local vin =  adc.read(0) * ADC_FACTOR
 
     local sensor = hcsr04.init(6,1,7)
     sensor.measure(function()
@@ -120,7 +122,7 @@ function on_wakeup(time)
             wlan_enable(function()
                 print("WLAN on")
 
-                sendBeacon(newValue, isChanged, sensor, tempInstance, function()
+                sendBeacon(newValue, isChanged, sensor, tempInstance, vin, function()
                     rtcmem.write32(RTC_POS_VALUE, newValue)
                     rtcmem.write32(RTC_POS_NEXT_CHECKIN, time + CHECKIN_TIME)
                     rtcmem.write32(RTC_POS_ERR_COUNT, 0)
@@ -145,7 +147,7 @@ end
 
 
 
-function sendBeacon(status, isChanged, hc1, tempInstance, callback)
+function sendBeacon(status, isChanged, hc1, tempInstance, vin, callback)
     print("publishing status...")
 
     local m = mqtt_create_client()
@@ -155,7 +157,7 @@ function sendBeacon(status, isChanged, hc1, tempInstance, callback)
 
         local event = "CHECKIN"
         if isChanged then event = "STATUS_CHANGED" end
-        local vin =  adc.read(0)*ADC_FACTOR
+        local uptime = rtctime.get()
 
         mqtt_publish(client, topic.."/status", status, 0, 1)
         mqtt_publish(client, topic.."/distance", hc1.distance, 0, 1)
@@ -163,6 +165,7 @@ function sendBeacon(status, isChanged, hc1, tempInstance, callback)
         mqtt_publish(client, topic.."/cv", hc1.cv, 0, 1)
         mqtt_publish(client, topic.."/vin", vin, 0, 1)
         mqtt_publish(client, topic.."/rssi", wifi.sta.getrssi(), 0, 1)
+        mqtt_publish(client, topic.."/uptime", uptime, 0, 1)
 
         if tempInstance then
             mqtt_publish(client, topic.."/temp", tempInstance.temp, 0, 1)

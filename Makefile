@@ -18,6 +18,7 @@ BUILDDIR = build
 
 SOURCES := $(wildcard $(SOURCEDIR)/*.lua)
 SOURCES := $(filter-out $(wildcard */*.example.*), $(SOURCES))
+SOURCES := $(filter-out $(wildcard */*_test.*), $(SOURCES))
 TARGETS := $(patsubst $(SOURCEDIR)/%.lua, $(BUILDDIR)/%.lua, $(SOURCES))
 
 

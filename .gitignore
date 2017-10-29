@@ -1,4 +1,6 @@
 *.iml
 .idea
+.DS_Store
 src/config.lua
 build
+env
